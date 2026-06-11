@@ -9,7 +9,9 @@ window.KUNTULIZATOR_DATA = {
     "decimalPlaces": 2,
     "topPlaces": 7,
     "banksBurnIfNoWinner": true,
-    "playoffPolicy": "Плей-офф пока не фиксируем"
+    "playoffPolicy": "Плей-офф пока не фиксируем",
+    "sheetCsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSpyPbcc20eeE0khQNgK5xBDvhUmJMdLClNhl0YgH31GMriyF2-yeMyw1WNzENB7efQZUP-5PNeSAtd/pub?gid=0&single=true&output=csv",
+    "autoRefreshMs": 60000
   },
   "participants": [
     {

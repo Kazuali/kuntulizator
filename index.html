@@ -27,6 +27,11 @@
       <button class="tab" data-tab="predictions">Прогнозы</button>
       <button class="tab" data-tab="rules">Правила</button>
     </nav>
+
+    <div class="data-toolbar">
+      <div id="dataStatus" class="data-status">Данные: загружаются из Google Sheets…</div>
+      <button id="refreshButton" class="refresh-button" type="button">Обновить данные</button>
+    </div>
   </header>
 
   <main>
@@ -35,7 +40,7 @@
       <div class="grid two">
         <article class="card">
           <h2>Текущая зона</h2>
-          <p class="muted">Пока результатов нет, у всех 0 очков. После ввода фактического счёта таблица пересчитается автоматически.</p>
+          <p class="muted">Данные подтягиваются из Google Sheets. После ввода фактического счёта в строку «РЕЗУЛЬТАТ» таблица пересчитается автоматически.</p>
           <div id="zonePreview"></div>
         </article>
         <article class="card">
@@ -62,7 +67,7 @@
     <section id="matches" class="page">
       <article class="card">
         <h2>Матчи первого тура</h2>
-        <p class="muted">Фактические результаты пока пустые. Их можно будет внести в файл data.js после матчей.</p>
+        <p class="muted">Фактические результаты берутся из строки «РЕЗУЛЬТАТ» в Google Sheets. Формат счёта: 2-1, 1-0, 0-0.</p>
         <div id="matchCards" class="match-grid"></div>
       </article>
     </section>
@@ -103,7 +108,7 @@
 
   <footer>
     <span>Кунтулизатор · MVP</span>
-    <span>Данные: 1 тур из загруженной таблицы</span>
+    <span>Данные: Google Sheets · автообновление 60 сек.</span>
   </footer>
 
   <script src="data.js"></script>
