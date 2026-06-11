@@ -25,12 +25,13 @@
       <button class="tab" data-tab="standings">Таблица</button>
       <button class="tab" data-tab="matches">Матчи</button>
       <button class="tab" data-tab="predictions">Прогнозы</button>
+      <button class="tab" data-tab="analytics">Статистика</button>
       <button class="tab" data-tab="rules">Правила</button>
     </nav>
 
-    <div class="data-toolbar">
-      <div id="dataStatus" class="data-status">Данные: загружаются из Google Sheets…</div>
-      <button id="refreshButton" class="refresh-button" type="button">Обновить данные</button>
+    <div class="quick-actions">
+      <button id="refreshButton" class="refresh-button" type="button">Обновить</button>
+      <div id="dataStatus" class="data-status" aria-live="polite"></div>
     </div>
   </header>
 
@@ -40,7 +41,6 @@
       <div class="grid two">
         <article class="card">
           <h2>Текущая зона</h2>
-          <p class="muted">Данные подтягиваются из Google Sheets. После ввода фактического счёта в строку «РЕЗУЛЬТАТ» таблица пересчитается автоматически.</p>
           <div id="zonePreview"></div>
         </article>
         <article class="card">
@@ -55,7 +55,7 @@
         <div class="section-head">
           <div>
             <h2>Турнирная таблица</h2>
-            <p class="muted">Места 1–7 отмечены как победная зона. Остальные участники находятся в зоне риска.</p>
+            <p class="muted">Места 1–7 — победная зона. Места 8–14 — зона риска.</p>
           </div>
         </div>
         <div class="table-wrap">
@@ -67,7 +67,6 @@
     <section id="matches" class="page">
       <article class="card">
         <h2>Матчи первого тура</h2>
-        <p class="muted">Фактические результаты берутся из строки «РЕЗУЛЬТАТ» в Google Sheets. Формат счёта: 2-1, 1-0, 0-0.</p>
         <div id="matchCards" class="match-grid"></div>
       </article>
     </section>
@@ -77,13 +76,33 @@
         <div class="section-head">
           <div>
             <h2>Прогнозы участников</h2>
-            <p class="muted">Выберите матч, чтобы увидеть прогнозы и распределение ставок по исходам.</p>
+            <p class="muted">Выберите матч, чтобы увидеть прогнозы и распределение по исходам.</p>
           </div>
           <select id="matchSelect" class="select"></select>
         </div>
         <div id="predictionSummary" class="summary-row"></div>
         <div class="table-wrap">
           <table id="predictionsTable"></table>
+        </div>
+      </article>
+    </section>
+
+    <section id="analytics" class="page">
+      <div class="grid stats analytics-stats" id="analyticsStats"></div>
+      <div class="grid two">
+        <article class="card">
+          <h2>Лучшие показатели</h2>
+          <div id="topAnalytics"></div>
+        </article>
+        <article class="card">
+          <h2>Матчи и банк</h2>
+          <div id="matchAnalytics"></div>
+        </article>
+      </div>
+      <article class="card analytics-table-card">
+        <h2>Статистика участников</h2>
+        <div class="table-wrap">
+          <table id="participantStatsTable"></table>
         </div>
       </article>
     </section>
@@ -107,8 +126,7 @@
   </main>
 
   <footer>
-    <span>Кунтулизатор · MVP</span>
-    <span>Данные: Google Sheets · автообновление 60 сек.</span>
+    <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
   <script src="data.js"></script>

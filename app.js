@@ -4,6 +4,7 @@ let refreshTimerId = null;
 const byId = (id) => document.getElementById(id);
 const e = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[ch]));
 const fmt = (n) => Number(n || 0).toFixed(data.settings.decimalPlaces);
+const pct = (part, total) => total ? `${Math.round((part / total) * 100)}%` : "—";
 const outcome = (h, a) => h > a ? "home" : h < a ? "away" : "draw";
 
 function clean(value) {
@@ -162,54 +163,158 @@ function getPredictions(matchId) {
   return data.predictions.filter(p => p.matchId === matchId);
 }
 
+function outcomeLabel(code, match) {
+  if (code === "home") return `Победа: ${match.home}`;
+  if (code === "away") return `Победа: ${match.away}`;
+  return "Ничья";
+}
+
+function calculateMatchBreakdowns() {
+  return data.matches
+    .filter(match => match.homeScore !== null && match.awayScore !== null)
+    .map(match => {
+      const fact = outcome(match.homeScore, match.awayScore);
+      const preds = getPredictions(match.id);
+      const resultWinners = preds.filter(p => outcome(p.home, p.away) === fact);
+      const exactWinners = preds.filter(p => p.home === match.homeScore && p.away === match.awayScore);
+      const resultPoints = resultWinners.length ? data.settings.resultBank / resultWinners.length : 0;
+      const exactPoints = exactWinners.length ? data.settings.exactScoreBank / exactWinners.length : 0;
+
+      const rows = preds.map(p => {
+        const gotResult = resultWinners.includes(p);
+        const gotExact = exactWinners.includes(p);
+        return {
+          participantId: p.participantId,
+          participantName: participantName(p.participantId),
+          prediction: `${p.home}-${p.away}`,
+          resultPoints: gotResult ? resultPoints : 0,
+          exactPoints: gotExact ? exactPoints : 0,
+          total: (gotResult ? resultPoints : 0) + (gotExact ? exactPoints : 0),
+          gotResult,
+          gotExact
+        };
+      });
+
+      return {
+        match,
+        fact,
+        preds,
+        resultWinners,
+        exactWinners,
+        resultPoints,
+        exactPoints,
+        burnedResultBank: resultWinners.length ? 0 : data.settings.resultBank,
+        burnedExactScoreBank: exactWinners.length ? 0 : data.settings.exactScoreBank,
+        rows
+      };
+    });
+}
+
 function calculateStandings() {
-  const rows = data.participants.map(p => ({
+  const rows = data.participants.map((p, seed) => ({
     id: p.id,
     name: p.name,
+    seed,
     total: 0,
+    resultPoints: 0,
+    exactScorePoints: 0,
     resultHits: 0,
     exactHits: 0,
-    played: 0
+    misses: 0,
+    played: 0,
+    bestMatchPoints: 0,
+    bestMatchTitle: "—"
   }));
 
   const index = Object.fromEntries(rows.map(r => [r.id, r]));
+  const breakdowns = calculateMatchBreakdowns();
 
-  for (const match of data.matches) {
-    if (match.homeScore === null || match.awayScore === null) continue;
-
-    const fact = outcome(match.homeScore, match.awayScore);
-    const preds = getPredictions(match.id);
-    const resultWinners = preds.filter(p => outcome(p.home, p.away) === fact);
-    const exactWinners = preds.filter(p => p.home === match.homeScore && p.away === match.awayScore);
-
-    const resultPoints = resultWinners.length ? data.settings.resultBank / resultWinners.length : 0;
-    const exactPoints = exactWinners.length ? data.settings.exactScoreBank / exactWinners.length : 0;
-
-    for (const p of preds) {
+  for (const b of breakdowns) {
+    for (const p of b.rows) {
       const row = index[p.participantId];
       if (!row) continue;
       row.played += 1;
-      if (resultWinners.includes(p)) {
-        row.total += resultPoints;
-        row.resultHits += 1;
-      }
-      if (exactWinners.includes(p)) {
-        row.total += exactPoints;
-        row.exactHits += 1;
+      row.total += p.total;
+      row.resultPoints += p.resultPoints;
+      row.exactScorePoints += p.exactPoints;
+      if (p.gotResult) row.resultHits += 1;
+      if (p.gotExact) row.exactHits += 1;
+      if (!p.gotResult) row.misses += 1;
+      if (p.total > row.bestMatchPoints) {
+        row.bestMatchPoints = p.total;
+        row.bestMatchTitle = matchTitle(b.match);
       }
     }
   }
 
-  return rows.sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "ru"));
+  return rows.sort((a, b) =>
+    b.total - a.total ||
+    b.exactHits - a.exactHits ||
+    b.resultHits - a.resultHits ||
+    a.seed - b.seed
+  );
+}
+
+function getAnalytics() {
+  const standings = calculateStandings();
+  const breakdowns = calculateMatchBreakdowns();
+  const completed = breakdowns.length;
+  const leader = standings[0] || null;
+  const border = standings[data.settings.topPlaces - 1] || null;
+  const firstRisk = standings[data.settings.topPlaces] || null;
+  const topResult = [...standings].sort((a, b) => b.resultHits - a.resultHits || b.total - a.total || a.seed - b.seed)[0] || null;
+  const topExact = [...standings].sort((a, b) => b.exactHits - a.exactHits || b.total - a.total || a.seed - b.seed)[0] || null;
+  const bestAverage = [...standings].filter(r => r.played > 0).sort((a, b) => (b.total / b.played) - (a.total / a.played) || a.seed - b.seed)[0] || null;
+
+  let bestSingle = null;
+  for (const b of breakdowns) {
+    for (const row of b.rows) {
+      if (!bestSingle || row.total > bestSingle.total) {
+        bestSingle = { ...row, matchTitle: matchTitle(b.match), score: `${b.match.homeScore}-${b.match.awayScore}` };
+      }
+    }
+  }
+
+  const totalBurnedResult = breakdowns.reduce((sum, b) => sum + b.burnedResultBank, 0);
+  const totalBurnedExact = breakdowns.reduce((sum, b) => sum + b.burnedExactScoreBank, 0);
+  const totalBurned = totalBurnedResult + totalBurnedExact;
+  const totalExactHits = standings.reduce((sum, r) => sum + r.exactHits, 0);
+  const totalResultHits = standings.reduce((sum, r) => sum + r.resultHits, 0);
+
+  const hardestByResult = [...breakdowns].sort((a, b) => a.resultWinners.length - b.resultWinners.length || a.exactWinners.length - b.exactWinners.length)[0] || null;
+  const easiestByResult = [...breakdowns].sort((a, b) => b.resultWinners.length - a.resultWinners.length || b.exactWinners.length - a.exactWinners.length)[0] || null;
+  const bestExactMatch = [...breakdowns].sort((a, b) => b.exactWinners.length - a.exactWinners.length || b.resultWinners.length - a.resultWinners.length)[0] || null;
+
+  return {
+    standings,
+    breakdowns,
+    completed,
+    leader,
+    border,
+    firstRisk,
+    topResult,
+    topExact,
+    bestAverage,
+    bestSingle,
+    totalBurned,
+    totalBurnedResult,
+    totalBurnedExact,
+    totalExactHits,
+    totalResultHits,
+    hardestByResult,
+    easiestByResult,
+    bestExactMatch
+  };
 }
 
 function renderStats() {
-  const completed = data.matches.filter(m => m.homeScore !== null && m.awayScore !== null).length;
+  const a = getAnalytics();
+  const gap = a.border && a.firstRisk ? Math.max(0, a.border.total - a.firstRisk.total) : 0;
   const stats = [
-    ["Участников", data.participants.length],
-    ["Матчей 1 тура", data.matches.length],
-    ["Прогнозов", data.predictions.length],
-    ["Сыграно матчей", completed],
+    ["Лидер", a.leader && a.completed ? `${a.leader.name} · ${fmt(a.leader.total)}` : "—"],
+    ["Сыграно", `${a.completed} / ${data.matches.length}`],
+    [`Граница топ-${data.settings.topPlaces}`, a.completed ? `${fmt(a.border?.total || 0)} · отрыв ${fmt(gap)}` : "—"],
+    ["Сгорело банка", a.completed ? fmt(a.totalBurned) : "—"],
   ];
 
   byId("stats").innerHTML = stats.map(([label, value]) => `
@@ -255,18 +360,20 @@ function renderStandings() {
   byId("standingsTable").innerHTML = `
     <thead>
       <tr>
-        <th>Место</th><th>Участник</th><th>Очки</th><th>Угадано исходов</th><th>Точных счетов</th><th>Зона</th>
+        <th>Место</th><th>Участник</th><th>Очки</th><th>Исходы</th><th>Точные</th><th>Лучший матч</th><th>Зона</th>
       </tr>
     </thead>
     <tbody>
       ${standings.map((r, i) => {
         const good = i < data.settings.topPlaces;
+        const best = r.bestMatchPoints ? `${fmt(r.bestMatchPoints)} · ${r.bestMatchTitle}` : "—";
         return `<tr>
           <td class="rank">${i + 1}</td>
           <td>${e(r.name)}</td>
           <td>${fmt(r.total)}</td>
           <td>${r.resultHits}</td>
           <td>${r.exactHits}</td>
+          <td>${e(best)}</td>
           <td class="${good ? "zone-good" : "zone-bad"}">${good ? "Победная" : "Риск"}</td>
         </tr>`;
       }).join("")}
@@ -275,13 +382,21 @@ function renderStandings() {
 }
 
 function renderMatches() {
-  byId("matchCards").innerHTML = data.matches.map((m, index) => `
-    <div class="match-card">
-      <h3>${index + 1}. ${e(matchTitle(m))}</h3>
-      <p class="muted">${e(m.round)}</p>
-      <div class="score">${m.homeScore === null ? "—" : `${m.homeScore}-${m.awayScore}`}</div>
-    </div>
-  `).join("");
+  const breakdownByMatch = Object.fromEntries(calculateMatchBreakdowns().map(b => [b.match.id, b]));
+  byId("matchCards").innerHTML = data.matches.map((m, index) => {
+    const b = breakdownByMatch[m.id];
+    const meta = b
+      ? `<div class="mini-meta">Исход: ${b.resultWinners.length}/${data.participants.length} · точный: ${b.exactWinners.length}/${data.participants.length}</div>`
+      : `<div class="mini-meta">ожидается</div>`;
+    return `
+      <div class="match-card">
+        <h3>${index + 1}. ${e(matchTitle(m))}</h3>
+        <p class="muted">${e(m.round)}</p>
+        <div class="score">${m.homeScore === null ? "—" : `${m.homeScore}-${m.awayScore}`}</div>
+        ${meta}
+      </div>
+    `;
+  }).join("");
 }
 
 function renderPredictionControls() {
@@ -298,6 +413,8 @@ function renderPredictions(matchId) {
   const match = data.matches.find(m => m.id === matchId);
   if (!match) return;
   const preds = getPredictions(matchId).map(p => ({...p, name: participantName(p.participantId)}));
+  const breakdown = calculateMatchBreakdowns().find(b => b.match.id === matchId);
+  const pointsByParticipant = breakdown ? Object.fromEntries(breakdown.rows.map(r => [r.participantId, r])) : {};
 
   const homeCount = preds.filter(p => outcome(p.home, p.away) === "home").length;
   const drawCount = preds.filter(p => outcome(p.home, p.away) === "draw").length;
@@ -311,14 +428,80 @@ function renderPredictions(matchId) {
 
   byId("predictionsTable").innerHTML = `
     <thead>
-      <tr><th>Участник</th><th>Прогноз</th><th>Исход прогноза</th></tr>
+      <tr><th>Участник</th><th>Прогноз</th><th>Исход прогноза</th><th>Очки за матч</th></tr>
     </thead>
     <tbody>
       ${preds.map(p => {
         const o = outcome(p.home, p.away);
-        const label = o === "home" ? `Победа: ${match.home}` : o === "away" ? `Победа: ${match.away}` : "Ничья";
-        return `<tr><td>${e(p.name)}</td><td>${p.home}-${p.away}</td><td>${e(label)}</td></tr>`;
+        const points = pointsByParticipant[p.participantId]?.total;
+        return `<tr>
+          <td>${e(p.name)}</td>
+          <td>${p.home}-${p.away}</td>
+          <td>${e(outcomeLabel(o, match))}</td>
+          <td>${points === undefined ? "—" : fmt(points)}</td>
+        </tr>`;
       }).join("")}
+    </tbody>
+  `;
+}
+
+function renderAnalytics() {
+  const a = getAnalytics();
+  const gap = a.border && a.firstRisk ? Math.max(0, a.border.total - a.firstRisk.total) : 0;
+  const analyticsStats = [
+    ["Точных счетов", a.completed ? a.totalExactHits : "—"],
+    ["Угаданных исходов", a.completed ? a.totalResultHits : "—"],
+    ["Отрыв 7-го от 8-го", a.completed ? fmt(gap) : "—"],
+    ["Сгорело точных", a.completed ? fmt(a.totalBurnedExact) : "—"]
+  ];
+
+  byId("analyticsStats").innerHTML = analyticsStats.map(([label, value]) => `
+    <div class="stat"><span>${e(label)}</span><strong>${e(value)}</strong></div>
+  `).join("");
+
+  const empty = `<p class="muted">Статистика появится после первого введённого результата.</p>`;
+  if (!a.completed) {
+    byId("topAnalytics").innerHTML = empty;
+    byId("matchAnalytics").innerHTML = empty;
+  } else {
+    byId("topAnalytics").innerHTML = `
+      <div class="insight-list">
+        <div class="insight"><span>Лидер</span><strong>${e(a.leader.name)} · ${fmt(a.leader.total)}</strong></div>
+        <div class="insight"><span>Лучший по исходам</span><strong>${e(a.topResult.name)} · ${a.topResult.resultHits}</strong></div>
+        <div class="insight"><span>Лучший по точным счетам</span><strong>${e(a.topExact.name)} · ${a.topExact.exactHits}</strong></div>
+        <div class="insight"><span>Лучший разовый матч</span><strong>${a.bestSingle ? `${e(a.bestSingle.participantName)} · ${fmt(a.bestSingle.total)} · ${e(a.bestSingle.matchTitle)}` : "—"}</strong></div>
+        <div class="insight"><span>Лучший средний темп</span><strong>${a.bestAverage ? `${e(a.bestAverage.name)} · ${fmt(a.bestAverage.total / a.bestAverage.played)} за матч` : "—"}</strong></div>
+      </div>
+    `;
+
+    byId("matchAnalytics").innerHTML = `
+      <div class="insight-list">
+        <div class="insight"><span>Сложнейший матч по исходу</span><strong>${a.hardestByResult ? `${e(matchTitle(a.hardestByResult.match))} · ${a.hardestByResult.resultWinners.length}/${data.participants.length}` : "—"}</strong></div>
+        <div class="insight"><span>Самый понятный матч</span><strong>${a.easiestByResult ? `${e(matchTitle(a.easiestByResult.match))} · ${a.easiestByResult.resultWinners.length}/${data.participants.length}` : "—"}</strong></div>
+        <div class="insight"><span>Лучший матч по точным счетам</span><strong>${a.bestExactMatch ? `${e(matchTitle(a.bestExactMatch.match))} · ${a.bestExactMatch.exactWinners.length}/${data.participants.length}` : "—"}</strong></div>
+        <div class="insight"><span>Сгорело всего</span><strong>${fmt(a.totalBurned)} из ${fmt(a.completed * data.settings.matchBank)}</strong></div>
+        <div class="insight"><span>Сгорело за исходы / точные</span><strong>${fmt(a.totalBurnedResult)} / ${fmt(a.totalBurnedExact)}</strong></div>
+      </div>
+    `;
+  }
+
+  const participantRows = calculateStandings();
+  byId("participantStatsTable").innerHTML = `
+    <thead>
+      <tr><th>Участник</th><th>Очки</th><th>Исходы</th><th>Точные</th><th>Мимо</th><th>Средние очки</th><th>Точность исходов</th></tr>
+    </thead>
+    <tbody>
+      ${participantRows.map(r => `
+        <tr>
+          <td>${e(r.name)}</td>
+          <td>${fmt(r.total)}</td>
+          <td>${r.resultHits}</td>
+          <td>${r.exactHits}</td>
+          <td>${r.misses}</td>
+          <td>${r.played ? fmt(r.total / r.played) : "—"}</td>
+          <td>${pct(r.resultHits, r.played)}</td>
+        </tr>
+      `).join("")}
     </tbody>
   `;
 }
@@ -330,19 +513,22 @@ function renderAll() {
   renderStandings();
   renderMatches();
   renderPredictionControls();
+  renderAnalytics();
 }
 
 async function loadSheetData(manual = false) {
   const button = byId("refreshButton");
   const url = data.settings.sheetCsvUrl;
   if (!url) {
-    setStatus("Данные: используется локальный файл data.js", "");
+    setStatus("Локальные данные", "");
     return;
   }
 
   try {
-    if (button) button.disabled = true;
-    setStatus(manual ? "Данные: обновляю вручную…" : "Данные: обновляю из Google Sheets…", "");
+    if (button) {
+      button.disabled = true;
+      if (manual) button.textContent = "Обновляю…";
+    }
     const separator = url.includes("?") ? "&" : "?";
     const response = await fetch(`${url}${separator}_=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -350,12 +536,15 @@ async function loadSheetData(manual = false) {
     data = buildDataFromSheet(csvText);
     renderAll();
     const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    setStatus(`Данные: обновлено из Google Sheets в ${time}. Автообновление каждые 60 сек.`, "is-ok");
+    setStatus(`Обновлено: ${time}`, "is-ok");
   } catch (error) {
     console.error(error);
-    setStatus("Данные: не удалось загрузить Google Sheets. Показана последняя локальная версия.", "is-error");
+    setStatus("Не удалось обновить данные", "is-error");
   } finally {
-    if (button) button.disabled = false;
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Обновить";
+    }
   }
 }
 
