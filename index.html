@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Кунтулизатор</title>
-  <link rel="stylesheet" href="styles-v2.css?v=fix-20260611" />
+  <link rel="stylesheet" href="styles-v4.css?v=losh-badge-20260611" />
 </head>
 <body>
   <header class="hero">
@@ -20,6 +20,11 @@
       </div>
     </div>
 
+    <div id="loserBanner" class="loser-banner" aria-live="polite">
+      <span>Лох ебаный:</span>
+      <strong>пока не определён</strong>
+    </div>
+
     <nav class="tabs" aria-label="Разделы сайта">
       <button class="tab is-active" data-tab="dashboard">Главная</button>
       <button class="tab" data-tab="standings">Таблица</button>
@@ -27,10 +32,12 @@
       <button class="tab" data-tab="predictions">Прогнозы</button>
       <button class="tab" data-tab="analytics">Статистика</button>
       <button class="tab" data-tab="rules">Правила</button>
-      <button id="refreshButton" class="tab refresh-tab" type="button" aria-label="Обновить данные">↻ Обновить</button>
     </nav>
 
-    <div id="dataStatus" class="data-status" aria-live="polite" hidden></div>
+    <div class="refresh-row" aria-label="Обновление данных">
+      <button id="refreshButton" class="refresh-button" type="button">↻ Обновить данные</button>
+      <span id="dataStatus" class="data-status" aria-live="polite" hidden></span>
+    </div>
   </header>
 
   <main>
@@ -53,7 +60,7 @@
         <div class="section-head">
           <div>
             <h2>Турнирная таблица</h2>
-            <p class="muted">Места 1–7 — победная зона. Места 8–14 — зона риска.</p>
+            <p class="muted">Места 1–7 — победная зона. Остальные — ебездалы.</p>
           </div>
         </div>
         <div class="table-wrap">
@@ -93,7 +100,7 @@
           <div id="topAnalytics"></div>
         </article>
         <article class="card">
-          <h2>Матчи и банк</h2>
+          <h2>Матчи и прогнозы</h2>
           <div id="matchAnalytics"></div>
         </article>
       </div>
@@ -127,7 +134,7 @@
     <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
-  <script src="data-v2.js?v=fix-20260611"></script>
-  <script src="app-v2.js?v=fix-20260611"></script>
+  <script src="data-v4.js?v=losh-badge-20260611"></script>
+  <script src="app-v4.js?v=losh-badge-20260611"></script>
 </body>
 </html>
