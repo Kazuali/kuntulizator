@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Кунтулизатор</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles-v2.css?v=fix-20260611" />
 </head>
 <body>
   <header class="hero">
@@ -27,12 +27,10 @@
       <button class="tab" data-tab="predictions">Прогнозы</button>
       <button class="tab" data-tab="analytics">Статистика</button>
       <button class="tab" data-tab="rules">Правила</button>
+      <button id="refreshButton" class="tab refresh-tab" type="button" aria-label="Обновить данные">↻ Обновить</button>
     </nav>
 
-    <div class="quick-actions">
-      <button id="refreshButton" class="refresh-button" type="button">Обновить</button>
-      <div id="dataStatus" class="data-status" aria-live="polite"></div>
-    </div>
+    <div id="dataStatus" class="data-status" aria-live="polite" hidden></div>
   </header>
 
   <main>
@@ -129,7 +127,7 @@
     <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="data-v2.js?v=fix-20260611"></script>
+  <script src="app-v2.js?v=fix-20260611"></script>
 </body>
 </html>
