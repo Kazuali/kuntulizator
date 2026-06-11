@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Кунтулизатор</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__top">
+      <div>
+        <p class="eyebrow">ЧМ-2026 · закрытая лига</p>
+        <h1>Кунтулизатор</h1>
+        <p class="subtitle">14 участников, 24 матча первого тура, банк 2100 очков в каждом матче.</p>
+      </div>
+      <div class="hero__badge">
+        <span>Топ-7</span>
+        <strong>едят</strong>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="Разделы сайта">
+      <button class="tab is-active" data-tab="dashboard">Главная</button>
+      <button class="tab" data-tab="standings">Таблица</button>
+      <button class="tab" data-tab="matches">Матчи</button>
+      <button class="tab" data-tab="predictions">Прогнозы</button>
+      <button class="tab" data-tab="rules">Правила</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="page is-active">
+      <div class="grid stats" id="stats"></div>
+      <div class="grid two">
+        <article class="card">
+          <h2>Текущая зона</h2>
+          <p class="muted">Пока результатов нет, у всех 0 очков. После ввода фактического счёта таблица пересчитается автоматически.</p>
+          <div id="zonePreview"></div>
+        </article>
+        <article class="card">
+          <h2>Ближайшие матчи 1 тура</h2>
+          <div id="upcomingMatches"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="standings" class="page">
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <h2>Турнирная таблица</h2>
+            <p class="muted">Места 1–7 отмечены как победная зона. Остальные участники находятся в зоне риска.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="standingsTable"></table>
+        </div>
+      </article>
+    </section>
+
+    <section id="matches" class="page">
+      <article class="card">
+        <h2>Матчи первого тура</h2>
+        <p class="muted">Фактические результаты пока пустые. Их можно будет внести в файл data.js после матчей.</p>
+        <div id="matchCards" class="match-grid"></div>
+      </article>
+    </section>
+
+    <section id="predictions" class="page">
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <h2>Прогнозы участников</h2>
+            <p class="muted">Выберите матч, чтобы увидеть прогнозы и распределение ставок по исходам.</p>
+          </div>
+          <select id="matchSelect" class="select"></select>
+        </div>
+        <div id="predictionSummary" class="summary-row"></div>
+        <div class="table-wrap">
+          <table id="predictionsTable"></table>
+        </div>
+      </article>
+    </section>
+
+    <section id="rules" class="page">
+      <article class="card prose">
+        <h2>Правила Кунтулизатора</h2>
+        <p>В каждом матче в розыгрыше <strong>2100 условных рублей-очков</strong>.</p>
+        <ul>
+          <li><strong>1400 очков</strong> — банк за исход матча: победа первой команды, ничья или победа второй команды.</li>
+          <li><strong>700 очков</strong> — банк за точный счёт.</li>
+          <li>1400 очков делятся между всеми участниками, которые угадали исход.</li>
+          <li>700 очков делятся между всеми участниками, которые угадали точный счёт.</li>
+          <li>Если никто не угадал исход или точный счёт, соответствующий банк сгорает.</li>
+          <li>Очки округляются до двух знаков после запятой.</li>
+          <li>Правило плей-офф будет зафиксировано позже.</li>
+        </ul>
+        <p class="example">Пример: факт 2-1. Если 5 человек угадали исход, каждый получает 1400 / 5 = 280. Если 2 человека угадали точный счёт, каждый дополнительно получает 700 / 2 = 350.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <span>Кунтулизатор · MVP</span>
+    <span>Данные: 1 тур из загруженной таблицы</span>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
