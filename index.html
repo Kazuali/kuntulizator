@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Кунтулизатор</title>
-  <link rel="stylesheet" href="styles-v4.css?v=losh-badge-20260611" />
+  <link rel="stylesheet" href="styles-v12.css?v=production-deadlines-20260614" />
 </head>
 <body>
   <header class="hero">
@@ -12,10 +12,10 @@
       <div>
         <p class="eyebrow">ЧМ-2026 · закрытая лига</p>
         <h1>Кунтулизатор</h1>
-        <p class="subtitle">14 участников, 24 матча первого тура, банк 2100 очков в каждом матче.</p>
+        <p class="subtitle" id="heroSubtitle">Групповой этап: 3 тура, прогнозы сдаются по туру целиком.</p>
       </div>
       <div class="hero__badge">
-        <span>Топ-7</span>
+        <span id="topPlacesLabel">Топ-7</span>
         <strong>едят</strong>
       </div>
     </div>
@@ -31,6 +31,7 @@
       <button class="tab" data-tab="matches">Матчи</button>
       <button class="tab" data-tab="predictions">Прогнозы</button>
       <button class="tab" data-tab="analytics">Статистика</button>
+      <button class="tab" data-tab="submit">Сдать прогноз</button>
       <button class="tab" data-tab="rules">Правила</button>
     </nav>
 
@@ -49,7 +50,7 @@
           <div id="zonePreview"></div>
         </article>
         <article class="card">
-          <h2>Ближайшие матчи 1 тура</h2>
+          <h2>Ближайшие матчи</h2>
           <div id="upcomingMatches"></div>
         </article>
       </div>
@@ -60,7 +61,7 @@
         <div class="section-head">
           <div>
             <h2>Турнирная таблица</h2>
-            <p class="muted">Места 1–7 — победная зона. Остальные — ебездалы.</p>
+            <p class="muted" id="zoneCaption">Места 1–7 — победная зона. Остальные — ебездалы.</p>
           </div>
         </div>
         <div class="table-wrap">
@@ -71,7 +72,7 @@
 
     <section id="matches" class="page">
       <article class="card">
-        <h2>Матчи первого тура</h2>
+        <h2>Матчи группового этапа</h2>
         <div id="matchCards" class="match-grid"></div>
       </article>
     </section>
@@ -112,6 +113,64 @@
       </article>
     </section>
 
+
+    <section id="submit" class="page">
+      <article class="card submit-card">
+        <div class="section-head">
+          <div>
+            <h2>Сдать прогноз на тур</h2>
+            <p class="muted">Выбери тур. Прогноз сдаётся только на выбранный тур целиком. До дедлайна можно отправить новую версию.</p>
+          </div>
+        </div>
+
+        <div id="submitDeadlineBox" class="deadline-box"></div>
+
+        <div id="submitFormArea" class="submit-form-area">
+          <div class="form-grid">
+            <label class="field">
+              <span>Тур</span>
+              <select id="submitRound" class="select"></select>
+            </label>
+            <label class="field">
+              <span>Участник</span>
+              <select id="submitParticipant" class="select"></select>
+            </label>
+            <label class="field">
+              <span>PIN-код</span>
+              <input id="submitPin" class="input" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="4 цифры" />
+            </label>
+          </div>
+
+          <div class="submit-actions top-actions">
+            <button id="loadMyPredictionsButton" class="secondary-button" type="button">Загрузить мой прогноз</button>
+            <span class="hint-text">Чтобы посмотреть или исправить свой прогноз, выбери участника, введи PIN и нажми эту кнопку.</span>
+          </div>
+
+          <div id="submitMatches" class="submit-matches"></div>
+
+          <div class="submit-actions">
+            <button id="reviewPredictionsButton" class="primary-button" type="button">Проверить прогнозы</button>
+          </div>
+        </div>
+
+        <div id="reviewArea" class="review-area" hidden>
+          <h3>Проверь прогнозы перед отправкой</h3>
+          <p class="muted">После старта первого матча тура изменить прогнозы будет нельзя.</p>
+          <div id="reviewList" class="review-list"></div>
+          <label class="confirm-check">
+            <input id="confirmPredictions" type="checkbox" />
+            <span>Я проверил прогнозы и подтверждаю, что всё верно</span>
+          </label>
+          <div class="submit-actions">
+            <button id="backToEditButton" class="secondary-button" type="button">Вернуться к редактированию</button>
+            <button id="sendPredictionsButton" class="primary-button" type="button" disabled>Отправить прогнозы</button>
+          </div>
+        </div>
+
+        <div id="submitMessage" class="submit-message" aria-live="polite"></div>
+      </article>
+    </section>
+
     <section id="rules" class="page">
       <article class="card prose">
         <h2>Правила Кунтулизатора</h2>
@@ -134,7 +193,7 @@
     <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
-  <script src="data-v4.js?v=losh-badge-20260611"></script>
-  <script src="app-v4.js?v=losh-badge-20260611"></script>
+  <script src="data-v12.js?v=production-deadlines-20260614"></script>
+  <script src="app-v12.js?v=production-deadlines-20260614"></script>
 </body>
 </html>
