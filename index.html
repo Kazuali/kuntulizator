@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Кунтулизатор</title>
-  <link rel="stylesheet" href="styles-v14.css?v=review-hint-20260614" />
+  <link rel="stylesheet" href="styles-v21.css?v=submit-v21" />
 </head>
 <body>
   <header class="hero">
@@ -192,11 +192,61 @@
     </section>
   </main>
 
+
+  <button id="adminChatLauncher" class="admin-chat-launcher" type="button" aria-label="Открыть чат с админом">
+    <span class="admin-chat-launcher__pulse"></span>
+    <span class="admin-chat-launcher__icon">?</span>
+    <span class="admin-chat-launcher__text">Есть вопрос?</span>
+  </button>
+
+  <div id="adminChatOverlay" class="admin-chat-overlay" aria-hidden="true">
+    <div class="tv-chat" role="dialog" aria-label="Чат с админом Кунтулизатора">
+      <button id="adminChatClose" class="tv-chat__close" type="button" aria-label="Закрыть чат">×</button>
+      <div class="tv-chat__set tv-chat__set--off">
+        <div class="tv-chat__antenna" aria-hidden="true"><span></span><span></span></div>
+        <div class="tv-chat__body">
+          <div class="tv-chat__bezel">
+            <div class="tv-chat__screen">
+              <div class="tv-chat__boot" aria-hidden="true">
+                <div class="tv-chat__boot-dot"></div>
+                <strong>КУНТ TV</strong>
+                <small>подключение к админу</small>
+              </div>
+              <div class="tv-chat__content">
+                <div class="tv-chat__header">
+                  <div>
+                    <strong>Админ Кунтулизатора</strong>
+                    <span>канал связи для ебездалов</span>
+                  </div>
+                  <small>online</small>
+                </div>
+                <div id="adminChatMessages" class="tv-chat__messages">
+                  <div class="chat-bubble chat-bubble--admin">Можете написать вопрос. Админ ответит, как умеет.</div>
+                </div>
+                <form id="adminChatForm" class="tv-chat__form">
+                  <input id="adminChatInput" class="tv-chat__input" type="text" autocomplete="off" placeholder="Напиши вопрос..." />
+                  <button class="tv-chat__send" type="submit">OK</button>
+                </form>
+              </div>
+              <div class="tv-chat__scanlines" aria-hidden="true"></div>
+              <div class="tv-chat__glare" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="tv-chat__side-panel" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <div class="tv-chat__led"></div>
+          </div>
+        </div>
+        <div class="tv-chat__legs" aria-hidden="true"><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
-  <script src="data-v14.js?v=review-hint-20260614"></script>
-  <script src="app-v14.js?v=review-hint-20260614"></script>
+  <script src="data-v21.js?v=submit-v21"></script>
+  <script src="app-v21.js?v=submit-v21"></script>
 </body>
 </html>
