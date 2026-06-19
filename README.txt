@@ -1,4 +1,4 @@
-Кунтулизатор v23
+Кунтулизатор v24
 
 Что изменено:
 - На вкладке «Статистика» добавлена история позиций после каждого завершённого матча.
@@ -21,9 +21,9 @@
 
 Файлы для загрузки в GitHub:
 - index.html
-- styles-v23.css
-- data-v23.js
-- app-v23.js
+- styles-v24.css
+- data-v24.js
+- app-v24.js
 - README.txt
 - kuntulizator_data.json
 - hero-messi.jpg
