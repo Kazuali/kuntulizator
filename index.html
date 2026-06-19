@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Кунтулизатор</title>
-  <link rel="stylesheet" href="styles-v24.css?v=submit-v24" />
+  <link rel="stylesheet" href="styles-v29.css?v=submit-v29" />
 </head>
 <body>
   <header class="hero">
@@ -131,6 +131,20 @@
         <h2>Статистика участников</h2>
         <div class="table-wrap">
           <table id="participantStatsTable"></table>
+        </div>
+      </article>
+      <article class="card analytics-table-card">
+        <h2>Итоги после каждого тура</h2>
+        <p class="muted">Здесь видно, сколько очков было у каждого участника после последнего завершённого матча каждого тура.</p>
+        <div class="table-wrap">
+          <table id="roundAuditTable"></table>
+        </div>
+      </article>
+      <article class="card analytics-table-card">
+        <h2>Проверка истории после каждого матча</h2>
+        <p class="muted">Расшифровка для проверки: кто был лидером, кто был последним и какая была полная таблица после каждого завершённого матча.</p>
+        <div class="table-wrap">
+          <table id="positionAuditTable"></table>
         </div>
       </article>
     </section>
@@ -268,7 +282,7 @@
     <span>Кунтулизатор · закрытая лига ЧМ-2026</span>
   </footer>
 
-  <script src="data-v24.js?v=submit-v24"></script>
-  <script src="app-v24.js?v=submit-v24"></script>
+  <script src="data-v29.js?v=submit-v29"></script>
+  <script src="app-v29.js?v=submit-v29"></script>
 </body>
 </html>
