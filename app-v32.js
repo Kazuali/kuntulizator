@@ -44,8 +44,7 @@ function parseCsv(text) {
 }
 function splitTeams(title) {
   const normalized = clean(title);
-  let parts = normalized.split(/\s*[—–]\s*/);
-  if (parts.length < 2) parts = normalized.split(/\s+-\s+/);
+  const parts = normalized.split(/\s+[—–-]\s+/);
   if (parts.length >= 2) return { home: parts[0].trim(), away: parts.slice(1).join(" — ").trim() };
   return { home: normalized, away: "" };
 }
